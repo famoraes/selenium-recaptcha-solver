@@ -8,7 +8,7 @@ test_ua = 'Mozilla/5.0 (Windows NT 4.0; WOW64) AppleWebKit/537.36 (KHTML, like G
 
 options = webdriver.ChromeOptions()
 
-options.add_argument("--headless")
+# options.add_argument("--headless")
 options.add_argument("--window-size=1920,1080")
 
 options.add_argument(f'--user-agent={test_ua}')
@@ -16,20 +16,26 @@ options.add_argument(f'--user-agent={test_ua}')
 options.add_argument('--no-sandbox')
 options.add_argument("--disable-extensions")
 
-test_driver = webdriver.Chrome(options=options)
+test_driver = webdriver.Remote(
+    command_executor='http://localhost:4444/wd/hub',
+    options=options
+)
 
-solver = RecaptchaSolver(driver=test_driver, delay_config=StandardDelayConfig())
+solver = RecaptchaSolver(
+    driver=test_driver, delay_config=StandardDelayConfig())
 
 
 def test_solver():
     try:
         test_driver.get('https://www.google.com/recaptcha/api2/demo')
 
-        recaptcha_iframe = test_driver.find_element(By.XPATH, '//iframe[@title="reCAPTCHA"]')
+        recaptcha_iframe = test_driver.find_element(
+            By.XPATH, '//iframe[@title="reCAPTCHA"]')
 
         solver.click_recaptcha_v2(iframe=recaptcha_iframe)
 
-        test_driver.execute_script("document.getElementById('recaptcha-demo-submit').click()")
+        test_driver.execute_script(
+            "document.getElementById('recaptcha-demo-submit').click()")
 
         test_driver.find_element(By.CSS_SELECTOR, '.recaptcha-success')
 
